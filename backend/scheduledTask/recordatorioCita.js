@@ -10,6 +10,7 @@ const job = new CronJob('* * * * *', function () {
 
   const d = new Date();
   try {
+    console.log("Entroo");
     mailController.validarRecordatorioCita()
 
   } catch (ex) {

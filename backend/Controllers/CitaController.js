@@ -254,7 +254,7 @@ citaAgenda.recordarCitas = async () => {
                     const element = result.data[index];
                     let fechaAgendada = moment(element.cit_fecha_agendada, "DD-MM-YYYY")
                     let fechaActual = moment().tz(zone);
-                    if (fechaAgendada.diff(fechaActual, 'days') === -10) {
+                    if (fechaAgendada.diff(fechaActual, 'days') === -11) {
                         let profesores = await profesorController.getAllByIds(element.cit_profesores);
                         element.cit_profesores_extended = profesores.data
                         await citas.push(element);
