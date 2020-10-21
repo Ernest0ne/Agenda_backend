@@ -1,0 +1,17 @@
+[Unit]
+Description=Polaris Core Project Backend
+Documentation=https://example.com
+After=network.target
+
+[Service]
+Environment=PORT=3000
+Environment=IP_HOST=34.228.9.74
+Environment=HOST_DATABASE=34.228.9.74
+Environment=POST_DATABASE=9042
+Type=simple
+User=ec2-user
+ExecStart=/usr/bin/node -r dotenv/config /opt/polaris-core-project-backend/backend/index.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

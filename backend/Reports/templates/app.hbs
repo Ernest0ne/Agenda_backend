@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>PDF GENERATOR</title>
+    <style>
+        html {
+            background: white;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            background: white;
+        }
+
+        table,
+        th {
+            border-spacing: 0;
+            border-collapse: collapse;
+            border: none;
+        }
+
+        .box-header {
+            background-image: url({{url}}/static/logo.png);
+            width: 100%;
+            height: 50px;
+            background-size: 270px;
+            background-color: #008994;
+            background-repeat: no-repeat;
+            background-position: 12px center;
+            border-radius: 5px 5px 0px 0px;
+        }
+
+        svg.smile path {
+            fill: grey;
+        }
+
+        .ok.active>svg path {
+            fill: #098307;
+            opacity: 1;
+        }
+
+        .good.active>svg path {
+            fill: #FECF56;
+            opacity: 1;
+        }
+
+        .sad.active>svg path {
+            fill: #ED3237;
+            opacity: 1;
+        }
+
+        .smile {
+            width: 55px;
+            height: 55px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            float: left;
+        }
+
+        .divSmiles {
+            margin: auto;
+            height: 100%;
+            width: 185px;
+        }
+
+        .divSmiles>.good {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .photo {
+            height: 290px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+
+        .box-body {
+            width: 100%;
+            height: calc(100% - 100px);
+            margin-bottom: 1em;
+            margin-top: 1em;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .title-Bar {
+            background-color: #008994;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-top: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .title-Bar-2 {
+            background-color: rgba(107, 107, 107, 0.18823529411764706);
+            color: rgba(23, 23, 23, 0.5294117647058824);
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .titleContent {
+            font-size: 20px;
+            font-weight: bold;
+            padding-bottom: 5px;
+            color: black;
+            text-align: left;
+            margin: 0px !important;
+            float: left;
+        }
+
+        .textContent {
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.5411764705882353);
+            margin: 0;
+            text-align: left;
+            float: left;
+        }
+
+        .col-4 {
+            width: 33.33333333%;
+        }
+
+        .col-6 {
+            width: 50%;
+        }
+
+        .col-8 {
+            width: 66.66666667%;
+        }
+
+        .col-12 {
+            width: 100%;
+        }
+
+        .borUpDownOnly {
+            border-top: 1px solid #B3DCDF;
+            border-bottom: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .borUp {
+            border-top: 1px solid #B3DCDF;
+            padding-top: 5px;
+        }
+
+        .borUpLeftRight {
+            border-top: 1px solid #B3DCDF;
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .borDown {
+            border-bottom: 1px solid #B3DCDF;
+            padding-bottom: 5px;
+        }
+
+        .borDownLeftRigth {
+            border-bottom: 1px solid #B3DCDF;
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+            padding-bottom: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .borUpDownLeftRigth {
+            border-top: 1px solid #B3DCDF;
+            border-bottom: 1px solid #B3DCDF;
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .borUpDown {
+            border-top: 1px solid #B3DCDF;
+            border-bottom: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .borLeft {
+            border-left: 1px solid #B3DCDF;
+            padding-left: 5px;
+        }
+
+        .borRight {
+            border-right: 1px solid #B3DCDF;
+        }
+
+        .borRight>font {
+            padding-right: 5px;
+        }
+
+        .borLeftRight {
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+        }
+
+        .borLeftRight>font {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .separator {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .separeRow {
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .card {
+            box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.3686274509803922);
+            border-radius: 5px;
+            margin: 15px;
+            padding: 5px;
+        }
+
+        .firma {}
+
+        .firma>span {
+            text-align: center;
+            border-top: 1px solid black;
+            padding-top: 10px;
+            margin-top: 0px;
+        }
+
+        .firmaImg {
+            width: 100%;
+            height: 290px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-color: #ffffff;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* @media all {
+            div.saltopagina {
+                display: none;
+            }
+        } */
+
+        @media print {
+            div.saltopagina {
+                display: block;
+                page-break-before: always;
+            }
+        }
+
+        .saltopagina {
+            position: relative;
+        }
+
+        .saltopagina:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: #008994;
+            border-radius: 0px 0px 5px 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- hoja 1 -->
+    <div class="box-header">
+    </div>
+    <div class="box-body">
+
+        <p class="title-Bar">INFORME DIGITAL {{tipo}}</p>
+
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">N° Incidencia</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.id}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Fecha de creación</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.fecha_creacion}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Fecha limite de atención</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.fecha_limite}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <p class="title-Bar-2">INFORMACIÓN DEL COMERCIO</p>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Código único</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_uniqe_code}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Nombre</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_name}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">{{geoDist2}}</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_city}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th class="borRight" width="66.66666666%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Dirección</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_address}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Horario de atención:</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_schedule_attention}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borDownLeftRigth" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Celular</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_cellphone}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Teléfono:</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_phone}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Prioridad</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{comercio.comm_priority}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <p class="title-Bar-2">INFORMACIÓN DE LA INCIDENCIA</p>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th class="borLeftRight" width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Motivo</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.motivo}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            {{#if fallida}}
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Tipificación fallida</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.inci_typing}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            {{/if}}
+        </table>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="100%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Observación creación</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <ul>
+                                {{#observaciones_creacion}}
+                                {{#if obin_observation}}
+                                <li class="textContent">{{obin_observation}}</li>
+                                {{/if}}
+                                {{/observaciones_creacion}}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="100%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Observación cierre</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <ul>
+                                {{#observaciones_cierre}}
+                                <li class="textContent">{{obin_observation}}</li>
+                                {{/observaciones_cierre}}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th class="borLeftRight" width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Persona de contacto:</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{persona_contacto}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            {{#if cargo}}
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Cargo:</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{persona_contacto_cargo}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            {{/if}}
+        </table>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th class="borLeftRight" width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Fecha inicio atención:</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.inicio_atencion}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Tiempo fin de atención:</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.fin_atencion}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th class="borLeftRight" width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Tiempo atención:</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{incidencia.tiempo_atencion}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <span class="titleContent">Técnico</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="textContent">{{tecnico.user_id_user}} - {{tecnico.user_name}}</span>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        {{!-- calificacion --}}
+        {{{calificacion}}}
+        {{!-- terminales --}}
+        {{{terminales_template}}}
+        {{!-- accesorios --}}
+        {{{accesorios_template}}}
+        {{#if verSimcards}}
+        {{!-- simcards --}}
+        {{{simcards_template}}}
+        {{/if}}
+
+
+
+    </div>
+
+    </div>
+
+    <div class="saltopagina"></div>
+
+    {{!-- <!-- hoja 2 -->
+    <div class="box-header">
+    </div>
+    <div class="box-body">
+        
+
+    </div>
+
+    </div>
+
+    <div class="saltopagina"></div>
+
+    <!-- hoja 3 --> --}}
+    <div class="box-header">
+    </div>
+    <div class="box-body">
+
+        <p class="title-Bar-2">EVIDENCIA FOTOGRÁFICA</p>
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th class="borRight" width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto1.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {{#if isfirma}}
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto3.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/if}}
+                </table>
+            </th>
+
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto2.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {{#if isfirma}}
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto4.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/if}}
+                </table>
+            </th>
+
+        </table>
+
+
+
+        <br>
+
+        {{#if isfirma}}
+        <table width="100%" rules="cols" style="margin-top: 30%;">
+            <th class="firma" width="25%">
+            </th>
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="firmaImg"
+                                style="background-image: url({{url}}/photos/imagesIncidences/{{firma.obin_photo}});">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="firma">
+                            <span>Firma</span>
+                        </td>
+                    </tr>
+                </table>
+
+            </th>
+            <th class="firma" width="25%">
+            </th>
+        </table>
+        {{/if}}
+    </div>
+
+    </div>
+
+</body>
+
+</html>

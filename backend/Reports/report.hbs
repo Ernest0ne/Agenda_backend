@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>PDF GENERATOR</title>
+    <style>
+        html {
+            background: white;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            background: white;
+        }
+
+        table,
+        th {
+            border-spacing: 0;
+            border-collapse: collapse;
+            border: none;
+        }
+
+        .box-header {
+            background-image: url({{url}}/static/logo.png);
+            width: 100%;
+            height: 50px;
+            background-size: 270px;
+            background-color: #008994;
+            background-repeat: no-repeat;
+            background-position: 12px center;
+            border-radius: 5px 5px 0px 0px;
+        }
+
+        .ok {
+            background-image: url({{url}}/static/ok.svg);
+        }
+
+        .good {
+            background-image: url({{url}}/static/good.svg);
+        }
+
+        .sad {
+            background-image: url({{url}}/static/sad.svg);
+        }
+
+        .ok.active {
+            filter: contrast(61%) sepia(1) hue-rotate(30deg) saturate(9000%);
+            opacity: 1;
+        }
+
+        .good.active {
+            filter: contrast(0%) sepia(1) hue-rotate(13deg) saturate(6000%);
+            opacity: 1;
+        }
+
+        .sad.active {
+            filter: contrast(61%) sepia(1) hue-rotate(7deg) saturate(9000%);
+            opacity: 1;
+        }
+
+        .smile {
+            width: 55px;
+            height: 55px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            float: left;
+            opacity: 0.1;
+        }
+
+        .divSmiles {
+            margin: auto;
+            height: 100%;
+            width: 185px;
+        }
+
+        .divSmiles>.good {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .photo {
+            width: 95%;
+            height: 290px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+            margin: 14px;
+            background-color: #ffffff;
+            margin-left: 2.5%;
+            margin-right: 2.5%;
+            border: solid 1px rgba(0, 0, 0, 0.18823529411764706);
+        }
+
+        .box-body {
+            width: 100%;
+            height: calc(100% - 100px);
+            margin-bottom: 1em;
+            margin-top: 1em;
+        }
+
+        .box-footer {
+            width: 100%;
+            height: 50px;
+            background-color: #008994;
+            border-radius: 0px 0px 5px 5px;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .title-Bar {
+            background-color: #008994;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin-top: 0;
+        }
+
+        .title-Bar-2 {
+            background-color: rgba(107, 107, 107, 0.18823529411764706);
+            color: rgba(23, 23, 23, 0.5294117647058824);
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .titleContent {
+            font-size: 18px;
+            font-weight: bold;
+            padding-bottom: 5px;
+            color: black;
+            text-align: left;
+            margin: 0px !important;
+        }
+
+        .textContent {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.5411764705882353);
+            margin: 0;
+            text-align: left;
+        }
+
+        .col-4 {
+            width: 33.33333333%;
+        }
+
+        .col-6 {
+            width: 50%;
+        }
+
+        .col-8 {
+            width: 66.66666667%;
+        }
+
+        .col-12 {
+            width: 100%;
+        }
+
+        .borUpDownOnly {
+            border-top: 1px solid #B3DCDF;
+            border-bottom: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .borUp {
+            border-top: 1px solid #B3DCDF;
+            padding-top: 5px;
+        }
+
+        .borUpLeftRight {
+            border-top: 1px solid #B3DCDF;
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .borDown {
+            border-bottom: 1px solid #B3DCDF;
+            padding-bottom: 5px;
+        }
+
+        .borDownLeftRigth {
+            border-bottom: 1px solid #B3DCDF;
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+            padding-bottom: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .borUpDownLeftRigth {
+            border-top: 1px solid #B3DCDF;
+            border-bottom: 1px solid #B3DCDF;
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .borUpDown {
+            border-top: 1px solid #B3DCDF;
+            border-bottom: 1px solid #B3DCDF;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .borLeft {
+            border-left: 1px solid #B3DCDF;
+            padding-left: 5px;
+        }
+
+        .borRight {
+            border-right: 1px solid #B3DCDF;
+        }
+
+        .borRight>font {
+            padding-right: 5px;
+        }
+
+        .borLeftRight {
+            border-left: 1px solid #B3DCDF;
+            border-right: 1px solid #B3DCDF;
+        }
+
+        .borLeftRight>font {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .separator {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .separeRow {
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .card {
+            box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.3686274509803922);
+            border-radius: 5px;
+            margin: 15px;
+            padding: 5px;
+        }
+
+        .firma {}
+
+        .firma>h3 {
+            text-align: center;
+            border-top: 1px solid black;
+            padding-top: 10px;
+            margin-top: 0px;
+        }
+
+        .firmaImg {
+            width: 100%;
+            height: 290px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-color: #ffffff;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* @media all {
+            div.saltopagina {
+                display: none;
+            }
+        } */
+
+        @media print {
+            div.saltopagina {
+                display: block;
+                page-break-before: always;
+            }
+        }
+
+        .saltopagina {
+            position: relative;
+        }
+
+        .saltopagina:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: #008994;
+            border-radius: 0px 0px 5px 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- hoja 1 -->
+    <div class="box-header">
+    </div>
+    <div class="box-body">
+
+        <h3 class="title-Bar">INFORME DIGITAL SOPORTE EXITOSO</h3>
+
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">N° Incidencia</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.id}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Fecha de creación</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.fecha_creacion}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Fecha limite de atención</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.fecha_limite}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <!-- <div class="row borUpDown">
+            <div class="col col-4 separator">
+                <font class="titleContent">N° Incidencia</font>
+                <font class="textContent">555</font>
+            </div>
+            <div class="col col-4 borLeftRight">
+                <font class="titleContent">Fecha de creación</font>
+                <font class="textContent">27-07-2019 09:00</font>
+            </div>
+            <div class="col col-4 separator">
+                <font class="titleContent">Fecha limite de atención</font>
+                <font class="textContent">27-07-2019 09:00</font>
+            </div>
+        </div> -->
+
+        <h3 class="title-Bar-2">INFORMACIÓN DEL COMERCIO</h3>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Código único</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_uniqe_code}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Nombre</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_name}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Ciudad</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_city}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th class="borRight" width="66.66666666%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Dirección</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_address}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Horario de atención:</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_schedule_attention}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borDownLeftRigth" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Celular</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_cellphone}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Teléfono:</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_phone}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Prioridad</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_priority}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <h3 class="title-Bar-2">INFORMACIÓN DE LA INCIDENCIA</h3>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="100%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Motivo</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.motivo}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="100%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Observación creación</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <ul>
+                                {{#observaciones_creacion}}
+                                    {{#if obin_observation}}
+                                        <li class="textContent">{{obin_observation}}</li>
+                                    {{/if}}
+                                {{/observaciones_creacion}}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="100%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Observación cierre</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <ul>
+                                {{#observaciones_cierre}}
+                                <li class="textContent">{{obin_observation}}</li>
+                                {{/observaciones_cierre}}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th class="borRight" width="66.66666666%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Dirección</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_address}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Horario de atención:</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_schedule_attention}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Persona de contacto:</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{comercio.comm_contact_person}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Fecha inicio atención:</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.inicio_atencion}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Tiempo fin de atención:</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.fin_atencion}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Motivo</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.motivo}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Tiempo atención:</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{incidencia.tiempo_atencion}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Técnico</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{tecnico.user_id_user}} - {{tecnico.user_name}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+
+
+    </div>
+    <div class="box-footer">
+    </div>
+
+    <div class="saltopagina"></div>
+
+    <!-- hoja 2 -->
+    <div class="box-header">
+    </div>
+    <div class="box-body">
+
+        <h3 class="title-Bar-2">CALIFICACIÓN DEL SERVICIO</h3>
+
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Tiempo de atención</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="divSmiles">
+                                {{{calificacion_tiempo_atencion}}}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Presentación de técnico</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="divSmiles">
+                                {{{calificacion_presentacion}}}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Atención del técnico</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="divSmiles">
+                                {{{calificacion_atencion}}}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <h3 class="title-Bar-2">INFORMACIÓN TERMINAL {{#if instalacion}} INSTALADA {{else}} RETIRADA {{/if}}</h3>
+
+        <table class="borUpLeftRight" width="100%" rules="cols">
+            <th width="33.33333333%">
+                <table>
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Serial</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{terminal.inci_term_serial}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th class="borLeftRight" width="33.33333333%">
+                <table>
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Marca</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{terminal.inci_term_brand}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="33.33333333%">
+                <table>
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Modelo</h3>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{terminal.inci_term_model}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table> 
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th class="borRight" width="50%">
+                <table>
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Tecnología</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{terminal.inci_tecnology}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="50%">
+                <table>
+                    <tr>
+                        <td>
+                            <h3 class="titleContent">Numero de terminal</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 class="textContent">{{terminal.inci_term_number}}</h3>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+        <h3 class="title-Bar-2">ACCESORIOS {{#if instalacion}} INSTALADOS {{else}} RETIRADOS {{/if}}</h3>
+
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            {{#accesorios}}
+                <th width="33.33333333%">
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <h3 class="titleContent">Código:</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h3 class="textContent">{{codigo}}</h3>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+                <th class="borLeftRight" width="33.33333333%">
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <h3 class="titleContent">Nombre:</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h3 class="textContent">{{nombre}}</h3>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+                <th width="33.33333333%">
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <h3 class="titleContent">Cantidad:</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h3 class="textContent">{{cantidad}}</h3>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+            {{/accesorios}}
+        </table>
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            {{#simcard}}
+                <th width="33.33333333%">
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <h3 class="titleContent">Simcard</h3>
+                            </td>
+                        </tr>
+                        
+                    </table>
+                </th>
+                <th class="borLeftRight" width="33.33333333%">
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <h3 class="titleContent">Marca:</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h3 class="textContent">{{nombre}}</h3>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+                <th width="33.33333333%">
+                    <table width="100%">
+                        <tr>
+                            <td>
+                                <h3 class="titleContent">Serial:</h3>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h3 class="textContent">{{serial}}</h3>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+            {{/simcard}}
+        </table>
+
+    </div>
+    <div class="box-footer">
+    </div>
+
+    <div class="saltopagina"></div>
+
+    <!-- hoja 3 -->
+    <div class="box-header">
+    </div>
+    <div class="box-body">
+
+        <h3 class="title-Bar-2">EVIDENCIA FOTOGRÁFICA {{url}}</h3>
+
+        <table class="borUpDownLeftRigth" width="100%" rules="cols">
+            <th class="borRight" width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto1.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto2.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto3.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="card">
+                                <div class="photo"
+                                    style="background-image: url({{url}}/photos/imagesIncidences/{{foto4.obin_photo}});">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </table>
+
+        <br>
+
+        <table width="100%" rules="cols">
+            <th class="firma" width="25%">
+            </th>
+            <th width="50%">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="firmaImg"
+                                style="background-image: url({{url}}/photos/imagesIncidences/{{firma.obin_photo}});">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="firma">
+                            <h3>Firma</h3>
+                        </td>
+                    </tr>
+                </table>
+
+            </th>
+            <th class="firma" width="25%">
+            </th>
+        </table>
+
+    </div>
+    <div class="box-footer">
+    </div>
+
+</body>
+
+</html>
