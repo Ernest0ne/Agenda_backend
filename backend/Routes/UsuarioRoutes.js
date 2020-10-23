@@ -7,7 +7,8 @@ const mailController = require('../Controllers/MailController.js');
 
 //Routes
 router.post("/", md_authen.validateToken, usuarioController.save);
-router.post("/Login", usuarioController.logIn);
+router.post("/logIn", usuarioController.logIn);
+router.post("/updatePassword", usuarioController.updatePassword);
 
 
 module.exports = router;

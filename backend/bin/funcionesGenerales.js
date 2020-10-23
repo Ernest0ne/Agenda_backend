@@ -1,4 +1,5 @@
 const funcionesGenerales = {};
+const bcrypt = require('bcrypt');
 
 funcionesGenerales.eliminarDuplicados = (dato) => {
     let sinRepetidosx = dato.filter((valorActual, indiceActual, arreglo) => {
@@ -103,5 +104,21 @@ function obtenerNombreMes(mes) {
     if (mes === 11) return "Noviembre";
     if (mes === 12) return "Diciembre";
 }
+
+
+funcionesGenerales.generarTextoAleatorio = () => {
+    return new Promise(async (resolve, reject) => {
+        let textoRandom = Math.random() * (9999999999 - 999999999) + 999999999;
+        bcrypt.hash(textoRandom + "", 10, function (err, hash) {
+            if (err) {
+                resolve({ status: false, message: 'encryption error', data: null })
+            } else {
+
+            } resolve({ status: true, message: 'Exito.', data: hash })
+        });
+    });
+}
+
+
 
 module.exports = funcionesGenerales;

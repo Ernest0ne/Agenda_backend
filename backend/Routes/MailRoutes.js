@@ -4,5 +4,6 @@ const mailController = require("../Controllers/MailController.js");
 const md_authen = require("../Middlewares/Authenticator.js");
 
 router.post("/sendMail", mailController.sendMail);
+router.post("/resetClave", mailController.resetClave);
 
 module.exports = router;

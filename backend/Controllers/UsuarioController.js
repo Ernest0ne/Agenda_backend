@@ -4,6 +4,7 @@ const jwt = require("../Services/Jwt.js");
 const bcrypt = require('bcrypt');
 const conection = require('../database');
 const logger = require('../bin/logger');
+const bin = require('../bin/funcionesGenerales');
 
 const moment = require('moment-timezone');
 const zone = "America/Bogota"
@@ -48,40 +49,151 @@ usuarioAgenda.save = (req, res, next) => {
 
 usuarioAgenda.logIn = async (req, res) => {
     var req = req.body;
-    const query = "select * from usuario where usu_correo = ? ALLOW FILTERING";
-    try {
-        const parameters = [req.usu_login.toLowerCase()];
-        conection.execute(query, parameters, function (err, result) {
-            if (err) {
-                logger.error(err.stack);
-                res.status(200).send({ status: false, message: 'error', error: err });
-            } else {
-                if (result.rowLength > 0) {
-                    bcrypt.compare(req.usu_clave, result.rows[0].usu_clave, (err, data) => {
-                        if (data) {
-                            let token = jwt.createToken(result.rows[0]);
-                            res.status(200).send({
-                                token: token,
-                                message: "success",
-                                nombre: result.rows[0].usu_nombre,
-                                rol: result.rows[0].usu_rol,
-                                status: true
-                            });
-                        } else {
-                            res.status(200).send({ status: false, message: "Contraseña inválida" });
-                        }
-                    });
-                } else {
-                    res.status(200).send({ status: false, message: "Usuario inválido" });
-                }
-            }
-        });
-    } catch (ex) {
-        logger.error(ex.stack);
-        res.status(404).send({ status: false, error: "catch error" });
-    }
+    let result = await validateLogin(req);
+    res.status(200).send(result);
 };
 
+async function validateLogin(req) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = "select * from usuario where usu_correo = ? ALLOW FILTERING";
+            const parameters = [req.usu_login.toLowerCase()];
+            conection.execute(query, parameters, function (err, result) {
+                if (err) {
+                    logger.error(err.stack);
+                    resolve({ status: false, message: 'error', error: err });
+                } else {
+                    if (result.rowLength > 0) {
+                        bcrypt.compare(req.usu_clave, result.rows[0].usu_clave, (err, data) => {
+                            if (data) {
+                                let token = jwt.createToken(result.rows[0]);
+                                delete result.rows[0].usu_clave
+                                resolve({
+                                    token: token,
+                                    message: "success",
+                                    usuario: result.rows[0],
+                                    status: true
+                                });
+                            } else {
+                                resolve({ status: false, message: "Contraseña inválida" });
+                            }
+                        });
+                    } else {
+                        resolve({ status: false, message: "Usuario inválido" });
+                    }
+                }
+            });
+        } catch (ex) {
+            logger.error(ex.stack);
+            return { status: false, error: "catch error" };
+        }
+    });
+}
+
+usuarioAgenda.updatePassword = async (req, res) => {
+    var req = req.body;
+    let result = await validateLogin(req);
+    if (result.status === false) {
+        res.status(200).send(result);
+        return;
+    }
+    res.status(200).send(await updatePasswordMethod(req, result.usuario));
+}
+
+
+async function updatePasswordMethod(req, usuario) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = "update usuario set usu_clave = ? where usu_id = ? if exists";
+            bcrypt.hash(req.usu_clave_nueva, 10, function (err, hash) {
+                if (err) {
+                    logger.error(err.stack);
+                    resolve({ status: false, message: 'encryption error' });
+                } else {
+                    const parameters = [hash, usuario.usu_id];
+                    conection.execute(query, parameters, function (err2, result) {
+                        if (err2) {
+                            logger.error(err2.stack);
+                            resolve({ status: false, message: err2 });
+                            return;
+                        } else {
+                            if (Object.values(result.rows[0])[0]) {
+                                resolve({ status: true, message: "success", applied: Object.values(result.rows[0])[0] });
+                            } else {
+                                resolve({ status: false, message: "error", applied: Object.values(result.rows[0])[0] });
+                                return;
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (ex) {
+            logger.error(ex.stack);
+            return { status: false, error: "catch error" };
+        }
+    });
+}
+
+
+usuarioAgenda.resetPassword = async (req) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = await getByCorreo(req);
+            if (result.status === false) {
+                resolve(result);
+                return;
+            }
+            let resultgenerarTextoAleatorio = await bin.generarTextoAleatorio();
+            if (resultgenerarTextoAleatorio.status == false) {
+                resolve(resultgenerarTextoAleatorio);
+            }
+
+            let nuevaClave = resultgenerarTextoAleatorio.data
+            nuevaClave = nuevaClave.substring(nuevaClave.length - 30, nuevaClave.length)
+
+            req.usu_clave_nueva = nuevaClave;
+            let resultUpdatePassword = await updatePasswordMethod(req, result.data)
+            if (resultUpdatePassword.status === false) {
+                resolve(resultUpdatePassword);
+                return;
+            }
+
+            result.data.usu_clave_nueva = nuevaClave;
+            resultUpdatePassword.data = result.data;
+
+            resolve(resultUpdatePassword);
+        } catch (ex) {
+            logger.error(ex.stack);
+            return { status: false, error: "catch error", data: null };
+        }
+    });
+}
+
+
+
+async function getByCorreo(req) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = "select * from usuario where usu_correo = ? ALLOW FILTERING";
+            const parameters = [req.usu_login.toLowerCase()];
+            conection.execute(query, parameters, function (err, result) {
+                if (err) {
+                    logger.error(err.stack);
+                    resolve({ status: false, message: "Error.", data: err });
+                } else {
+                    if (result.rowLength > 0) {
+                        resolve({ status: true, message: "Éxito.", data: result.rows[0] });
+                    } else {
+                        resolve({ status: false, message: "Usuario inválido.", data: null });
+                    }
+                }
+            });
+        } catch (ex) {
+            logger.error(ex.stack);
+            return { status: false, error: "catch error", data: null };
+        }
+    });
+}
 
 
 //exports
