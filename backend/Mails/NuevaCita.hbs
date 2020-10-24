@@ -19,7 +19,7 @@
         <tr>
             <td style="padding: 0 8px;" colspan="2">
                 <p style="font-family: sans-serif;font-weight: 600;">Cordial saludo.</p>
-                <p style="font-family: sans-serif;">Estimado {{data.cit_nombre_profesor}}, te invito a la siguinete cita:</p>
+                <p style="font-family: sans-serif;">Estimado {{data.cit_destinatario}} {{data.email_texto}}</p>
                 <p style="font-family: sans-serif;font-weight: 600;">{{data.cit_nombre}}</p>
                 <p style="font-family: sans-serif;">{{data.cit_descripcion}}</p>
             </td>
@@ -45,10 +45,7 @@
                                                             <td width="90px" height="90px" xml="lang">
                                                                 <img width="80" height="80" border="1"
                                                                     style="width: 90px;height: 90px;border-radius: 50px;"
-                                                                    {{!--  src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ4-JKLk8YvnVSCOPz2VcoUWx84F2eOzBsjvw&usqp=CAU" --}}
-                                                                    {{!--  src="https://www.prodezk.com/wp-content/uploads/2017/11/Icono-Cambios-en-la-empresa.png" --}}
-                                                                    {{!-- src="https://cdn.pixabay.com/photo/2015/12/16/17/41/bell-1096280_960_720.png" --}}
-                                                                    src="https://image.flaticon.com/icons/png/512/2058/2058132.png">
+                                                                    src={{data.email_imagen}}>
                                                             </td>
                                                         </tr>
                                                         <tr style="height: 35%;">

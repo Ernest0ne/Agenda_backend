@@ -75,11 +75,20 @@ async function enviarEmailCitaAgendada(req) {
 
 
 mailController.validarRecordatorioCita = async () => {
-
     let citas = await citaController.recordarCitas()
-
     citas.data.forEach(element => {
-        console.log(element);
+        let data = element
+        data.email_imagen = bin.obtenerImagenEmail(3)
+        data.email_texto = 'paso a recordarte que tienes una cita la próxima semana.'
+        data.cit_fecha_agendada_formateada = bin.formatearFechaDescriptiva(element.cit_fecha_agendada)
+        let plantilla = 'NuevaCita'
+        let subject = 'Agendapp: ' + element.cit_nombre
+
+        element.cit_profesores_extended.forEach(profesor => {
+            data.cit_destinatario = profesor.pro_nombre + ' ' + profesor.pro_apellido + ','
+            enviarEmail(data, plantilla, subject, profesor.pro_correo.toLowerCase());
+        });
+
     });
 
 }

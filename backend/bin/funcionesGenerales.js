@@ -119,6 +119,12 @@ funcionesGenerales.generarTextoAleatorio = () => {
     });
 }
 
+funcionesGenerales.obtenerImagenEmail = (tipo) => {
+    if (tipo === 1) return 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQ4-JKLk8YvnVSCOPz2VcoUWx84F2eOzBsjvw&usqp=CAU'
+    if (tipo === 2) return 'https://www.prodezk.com/wp-content/uploads/2017/11/Icono-Cambios-en-la-empresa.png'
+    if (tipo === 3) return 'https://cdn.pixabay.com/photo/2015/12/16/17/41/bell-1096280_960_720.png'
+    if (tipo === 4) return 'https://image.flaticon.com/icons/png/512/2058/2058132.png'
+}
 
 
 module.exports = funcionesGenerales;
