@@ -8,6 +8,8 @@ const format = "DD-MM-YYYY HH:mm:ss";
 const date = moment().tz(zone).format(format);
 
 const profesorController = require("../Controllers/ProfesorController.js");
+const bin = require('../bin/funcionesGenerales');
+
 
 
 //methods
@@ -31,6 +33,7 @@ citaAgenda.save = async (request, response, next) => {
                 logger.error(err.stack);
                 return response.status(200).send({ status: false, message: err, data: null });
             } else if (result) {
+                EnviarEmailCrearCita(req);
                 return response.status(200).send({ status: true, message: "Cita creada.", data: null });
             }
         });
@@ -203,19 +206,16 @@ citaAgenda.validateTime = async (request, response) => {
 
 
 async function validarFechasCita(req, data) {
-
     let fechaInicioReq = moment(req.cit_fecha_agendada, "DD-MM-YYYY").set(
         {
             "hour": req.cit_hora_inicio.split(":")[0],
             "minute": req.cit_hora_inicio.split(":")[1]
         })
-
     let fechaFinReq = moment(req.cit_fecha_agendada, "DD-MM-YYYY").set(
         {
             "hour": req.cit_hora_fin.split(":")[0],
             "minute": req.cit_hora_fin.split(":")[1]
         })
-
     return new Promise((resolve, reject) => {
         let citas = [];
         data.forEach(element => {
@@ -287,6 +287,26 @@ async function getAll() {
             logger.error(error.stack);
             resolve({ status: false, message: "Not Acceptable.", data: null });
         }
+    });
+}
+
+
+async function EnviarEmailCrearCita(cita) {
+    return new Promise(async (resolve, reject) => {
+        let profesores = await profesorController.getAllByIds(cita.cit_profesores);
+        profesores.data.forEach(async element => {
+            let data = cita
+            data.email_imagen = bin.obtenerImagenEmail(1)
+            data.email_texto = 'te invito a una cita.'
+            data.cit_fecha_agendada_formateada = bin.formatearFechaDescriptiva(cita.cit_fecha_agendada)
+            let plantilla = 'NuevaCita'
+            let subject = 'Agendapp: ' + cita.cit_nombre
+            data.cit_destinatario = element.pro_nombre + ' ' + element.pro_apellido + ','
+            let destinatario = element.pro_correo.toLowerCase()
+            const mailController = require("../Controllers/MailController.js");
+            await mailController.crearCitaEmail(data, plantilla, subject, destinatario)
+        });
+        resolve({ status: true, message: "Éxito.", data: null });
     });
 }
 

@@ -1,5 +1,7 @@
 const funcionesGenerales = {};
 const bcrypt = require('bcrypt');
+const moment = require('moment-timezone');
+
 
 funcionesGenerales.eliminarDuplicados = (dato) => {
     let sinRepetidosx = dato.filter((valorActual, indiceActual, arreglo) => {
@@ -83,7 +85,8 @@ funcionesGenerales.ordenarFecha = (array, propiedad) => {
 }
 
 funcionesGenerales.formatearFechaDescriptiva = (date) => {
-    const f = new Date(date);
+    let dateMomentObject = moment(date, "DD/MM/YYYY");
+    const f = dateMomentObject.toDate();
     let dia = '' + f.getDate();
     let mes = (f.getMonth() + 1);
     return dia + " de " + obtenerNombreMes(mes) + " del " + f.getFullYear()

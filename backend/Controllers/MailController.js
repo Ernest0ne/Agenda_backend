@@ -1,4 +1,4 @@
-const mailController = {};
+const mailAgenda = {};
 const fs = require('fs-extra');
 const path = require('path');
 const hbs = require('handlebars');
@@ -19,7 +19,7 @@ const compileMailers = async function (templateName, data) {
     return await hbs.compile(html)(data);
 }
 
-mailController.sendMail = async (request, response) => {
+mailAgenda.sendMail = async (request, response) => {
     try {
         result = await enviarEmailCitaAgendada(request.body)
         if (result.status) {
@@ -48,7 +48,6 @@ async function enviarEmailCitaAgendada(req) {
                     pass: clave
                 }
             });
-
             req.cit_profesores.forEach(element => {
                 var mailOptions = {
                     from: correoOrigen,
@@ -63,9 +62,7 @@ async function enviarEmailCitaAgendada(req) {
                     }
                 });
             });
-
             resolve({ status: true, message: "Mail enviado.", data: null });
-
         } catch (error) {
             resolve({ status: false, message: "Catch error.", data: null });
             logger.error(error.stack);
@@ -74,7 +71,7 @@ async function enviarEmailCitaAgendada(req) {
 }
 
 
-mailController.validarRecordatorioCita = async () => {
+mailAgenda.validarRecordatorioCita = async () => {
     let citas = await citaController.recordarCitas()
     citas.data.forEach(element => {
         let data = element
@@ -88,9 +85,7 @@ mailController.validarRecordatorioCita = async () => {
             data.cit_destinatario = profesor.pro_nombre + ' ' + profesor.pro_apellido + ','
             enviarEmail(data, plantilla, subject, profesor.pro_correo.toLowerCase());
         });
-
     });
-
 }
 
 
@@ -109,7 +104,6 @@ async function enviarEmail(data, plantilla, subject, destinatario) {
                     pass: clave
                 }
             });
-
             var mailOptions = {
                 from: correoOrigen,
                 to: destinatario,
@@ -122,10 +116,7 @@ async function enviarEmail(data, plantilla, subject, destinatario) {
                     resolve({ status: false, message: "Mail error.", data: null });
                 }
             });
-
-
             resolve({ status: true, message: "Mail enviado.", data: null });
-
         } catch (error) {
             resolve({ status: false, message: "Catch error.", data: null });
             logger.error(error.stack);
@@ -134,7 +125,7 @@ async function enviarEmail(data, plantilla, subject, destinatario) {
 }
 
 
-mailController.resetClave = async (request, response) => {
+mailAgenda.resetClave = async (request, response) => {
     try {
         result = await ResetClaveMethod(request.body)
         response.status(200).send(result);
@@ -165,6 +156,10 @@ async function ResetClaveMethod(request) {
 }
 
 
+mailAgenda.crearCitaEmail = async (data, plantilla, subject, destinatario) => {
+    return await enviarEmail(data, plantilla, subject, destinatario)
+}
+
 
 //exports
-module.exports = mailController;
+module.exports = mailAgenda;
