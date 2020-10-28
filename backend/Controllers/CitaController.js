@@ -111,11 +111,13 @@ citaAgenda.getById = (request, response) => {
     }
 };
 
-citaAgenda.getByAgenda = (request, response) => {
+citaAgenda.getByAgenda = async (request, response) => {
 
     //Se creo el siguiente index para poder buscar por id de agenda
     //CREATE INDEX ON cita (keys(cit_agenda));
     //la sentencia CONTAINS busca algun valor dentro del mapa que conincida con la id de la agenda
+
+    await validarCitasPerdidas();
 
     const req = request.headers;
     const query = "select * from cita where cit_agenda CONTAINS? and cit_usuario =? allow filtering";
@@ -142,24 +144,7 @@ citaAgenda.update = async (request, response, next) => {
     if (registro.status && registro.message != req.cit_id) {
         return response.status(200).send({ status: false, message: "Esta Cita ya está registrada.", data: null });
     }
-
-    const query = "update cita set cit_nombre = ?, cit_descripcion = ?, cit_estado = ?, cit_fecha_agendada = ?, " +
-        "cit_profesores = ?, cit_calificacion = ?, cit_comentario = ?, cit_hora_inicio = ?, cit_hora_fin = ?, cit_lugar = ? where cit_id = ? if exists";
-    const parameters = [req.cit_nombre, req.cit_descripcion, req.cit_estado, req.cit_fecha_agendada, req.cit_profesores,
-    req.cit_calificacion, req.cit_comentario, req.cit_hora_inicio, req.cit_hora_fin, req.cit_lugar, req.cit_id];
-    try {
-        conection.execute(query, parameters, { prepare: true }, (err, result) => {
-            if (err) {
-                logger.error(err.stack);
-                return response.status(200).send({ status: false, message: err, data: null });
-            } else if (result) {
-                return response.status(200).send({ status: true, message: "Cita actualizada.", data: null });
-            }
-        });
-    } catch (ex) {
-        logger.error(ex.stack);
-        response.status(200).send({ status: false, message: "Not Acceptable.", data: null });
-    }
+    response.status(200).send(await updateCitaMethod(req));
 }
 
 citaAgenda.delete = (request, response) => {
@@ -307,6 +292,60 @@ async function EnviarEmailCrearCita(cita) {
             await mailController.crearCitaEmail(data, plantilla, subject, destinatario)
         });
         resolve({ status: true, message: "Éxito.", data: null });
+    });
+}
+
+
+
+async function updateCitaMethod(req) {
+    return new Promise(async (resolve, reject) => {
+        const query = "update cita set cit_nombre = ?, cit_descripcion = ?, cit_estado = ?, cit_fecha_agendada = ?, " +
+            "cit_profesores = ?, cit_calificacion = ?, cit_comentario = ?, cit_hora_inicio = ?, cit_hora_fin = ?, cit_lugar = ? where cit_id = ? if exists";
+        const parameters = [req.cit_nombre, req.cit_descripcion, req.cit_estado, req.cit_fecha_agendada, req.cit_profesores,
+        req.cit_calificacion, req.cit_comentario, req.cit_hora_inicio, req.cit_hora_fin, req.cit_lugar, req.cit_id];
+        try {
+            conection.execute(query, parameters, { prepare: true }, (err, result) => {
+                if (err) {
+                    logger.error(err.stack);
+                    resolve({ status: false, message: err, data: null });
+                } else if (result) {
+                    resolve({ status: true, message: "Cita actualizada.", data: null });
+                }
+            });
+        } catch (ex) {
+            logger.error(ex.stack);
+            resolve({ status: false, message: "Not Acceptable.", data: null });
+        }
+    });
+}
+
+
+
+async function validarCitasPerdidas() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = await getAll();
+            let citas = [];
+            if (result.status) {
+                for (let index = 0; index < result.data.length; index++) {
+                    const element = result.data[index];
+                    let fechaAgendada = moment(element.cit_fecha_agendada, "DD-MM-YYYY").set(
+                        {
+                            "hour": element.cit_hora_inicio.split(":")[0],
+                            "minute": element.cit_hora_inicio.split(":")[1]
+                        })
+                    let fechaActual = moment().tz(zone);
+                    if (fechaAgendada.isSameOrBefore(fechaActual) && element.cit_estado === 'AGENDADA') {
+                        element.cit_estado = 'PERDIDA'
+                        await updateCitaMethod(element)
+                    }
+                }
+                resolve({ status: true, message: "Exito.", data: citas });
+            }
+        } catch (error) {
+            logger.error(error.stack);
+            resolve({ status: false, message: "Not Acceptable.", data: null });
+        }
     });
 }
 

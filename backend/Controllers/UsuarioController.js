@@ -46,6 +46,26 @@ usuarioAgenda.save = (req, res, next) => {
     }
 }
 
+usuarioAgenda.update = async (request, response, next) => {
+    const req = request.body;
+
+    const query = "update usuario set usu_nombre = ?, usu_apellido = ? where usu_id = ? if exists";
+    const parameters = [req.usu_nombre, req.usu_apellido, request.user.id];
+    try {
+        conection.execute(query, parameters, { prepare: true }, (err, result) => {
+            if (err) {
+                logger.error(err.stack);
+                return response.status(200).send({ status: false, message: err, data: null });
+            } else if (result) {
+                return response.status(200).send({ status: true, message: "Usuario actualizado.", data: null });
+            }
+        });
+    } catch (ex) {
+        logger.error(ex.stack);
+        response.status(200).send({ status: false, message: "Not Acceptable.", data: null });
+    }
+}
+
 
 usuarioAgenda.logIn = async (req, res) => {
     var req = req.body;
@@ -118,7 +138,7 @@ async function updatePasswordMethod(req, usuario) {
                             return;
                         } else {
                             if (Object.values(result.rows[0])[0]) {
-                                resolve({ status: true, message: "success", applied: Object.values(result.rows[0])[0] });
+                                resolve({ status: true, message: "Clave actualizada.", applied: Object.values(result.rows[0])[0] });
                             } else {
                                 resolve({ status: false, message: "error", applied: Object.values(result.rows[0])[0] });
                                 return;
