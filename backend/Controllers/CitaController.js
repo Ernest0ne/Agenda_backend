@@ -5,7 +5,6 @@ const logger = require('../bin/logger');
 const moment = require('moment-timezone');
 const zone = "America/Bogota"
 const format = "DD-MM-YYYY HH:mm:ss";
-const date = moment().tz(zone).format(format);
 
 const profesorController = require("../Controllers/ProfesorController.js");
 const bin = require('../bin/funcionesGenerales');
@@ -17,6 +16,7 @@ const bin = require('../bin/funcionesGenerales');
 citaAgenda.save = async (request, response, next) => {
 
     const req = request.body;
+    const date = moment().tz(zone).format(format);
 
     let registro = await validarRegistro(req.cit_nombre, request.user.id, req.cit_fecha_agendada);
     if (registro.status) {
@@ -92,24 +92,15 @@ citaAgenda.get = (request, response) => {
 };
 
 
-citaAgenda.getById = (request, response) => {
-    const req = request.headers;
-    const query = "select * from cita where cit_id =? and cit_usuario =? allow filtering";
-    try {
-        conection.execute(query, [req.cit_id, request.user.id], (err, result) => {
-            if (err) {
-                logger.error(err.stack);
-                return response.status(200).send({ status: false, message: "error in BD.", data: null });
-            } else {
-                return response.status(200).send({ status: true, message: "Éxito.", data: result.rows });
-            }
-        });
-    }
-    catch (error) {
-        logger.error(error.stack);
-        response.status(200).send({ status: false, message: "Not Acceptable.", data: null });
-    }
+citaAgenda.getById = async (request, response) => {
+    response.status(200).send(await getByIdMethod(request));
 };
+
+
+citaAgenda.getByEstado = async (request, response) => {
+    response.status(200).send(await getByEstadoMethod(request));
+};
+
 
 citaAgenda.getByAgenda = async (request, response) => {
 
@@ -144,10 +135,16 @@ citaAgenda.update = async (request, response, next) => {
     if (registro.status && registro.message != req.cit_id) {
         return response.status(200).send({ status: false, message: "Esta Cita ya está registrada.", data: null });
     }
+    EnviarEmailActualizarCita(req)
     response.status(200).send(await updateCitaMethod(req));
 }
 
-citaAgenda.delete = (request, response) => {
+citaAgenda.delete = async (request, response) => {
+    let result = await getByIdMethod(request);
+    if (!result.status) {
+        return response.status(200).send(result);
+    }
+    EnviarEmailEliminarCita(result.data[0])
     const req = request.headers;
     const query = "delete from cita where cit_id =?";
     try {
@@ -239,7 +236,7 @@ citaAgenda.recordarCitas = async () => {
                     const element = result.data[index];
                     let fechaAgendada = moment(element.cit_fecha_agendada, "DD-MM-YYYY")
                     let fechaActual = moment().tz(zone);
-                    if (fechaAgendada.diff(fechaActual, 'days') === -13) {
+                    if (fechaAgendada.diff(fechaActual, 'days') === 6) {
                         let profesores = await profesorController.getAllByIds(element.cit_profesores);
                         element.cit_profesores_extended = profesores.data
                         await citas.push(element);
@@ -275,27 +272,113 @@ async function getAll() {
     });
 }
 
+async function getByIdMethod(request) {
+    const req = request.headers;
+    const query = "select * from cita where cit_id =? and cit_usuario =? allow filtering";
+    return new Promise((resolve, reject) => {
+        try {
+            conection.execute(query, [req.cit_id, request.user.id], (err, result) => {
+                if (err) {
+                    logger.error(err.stack);
+                    resolve({ status: false, message: "error in BD.", data: null });
+                } else {
+                    resolve({ status: true, message: "Éxito.", data: result.rows });
+                }
+            });
+        }
+        catch (error) {
+            logger.error(error.stack);
+            resolve({ status: false, message: "Not Acceptable.", data: null });
+        }
+    });
+}
+
+async function getByEstadoMethod(request) {
+    const req = request.headers;
+    const query = "select * from cita where cit_estado =? and cit_usuario =? allow filtering";
+    return new Promise((resolve, reject) => {
+        try {
+            conection.execute(query, [req.cit_estado, request.user.id], (err, result) => {
+                if (err) {
+                    logger.error(err.stack);
+                    resolve({ status: false, message: "error in BD.", data: null });
+                } else {
+                    resolve({ status: true, message: "Éxito.", data: result.rows });
+                }
+            });
+        }
+        catch (error) {
+            logger.error(error.stack);
+            resolve({ status: false, message: "Not Acceptable.", data: null });
+        }
+    });
+}
+
 
 async function EnviarEmailCrearCita(cita) {
     return new Promise(async (resolve, reject) => {
         let profesores = await profesorController.getAllByIds(cita.cit_profesores);
-        profesores.data.forEach(async element => {
+        for (let index = 0; index < profesores.data.length; index++) {
+            const element = profesores.data[index];
             let data = cita
             data.email_imagen = bin.obtenerImagenEmail(1)
-            data.email_texto = 'te invito a una cita.'
+            data.email_texto = 'te invito al siguiente evento.'
             data.cit_fecha_agendada_formateada = bin.formatearFechaDescriptiva(cita.cit_fecha_agendada)
             let plantilla = 'NuevaCita'
             let subject = 'Agendapp: ' + cita.cit_nombre
             data.cit_destinatario = element.pro_nombre + ' ' + element.pro_apellido + ','
             let destinatario = element.pro_correo.toLowerCase()
             const mailController = require("../Controllers/MailController.js");
-            await mailController.crearCitaEmail(data, plantilla, subject, destinatario)
-        });
+            let result = await mailController.crearCitaEmail(data, plantilla, subject, destinatario)
+        }
+        resolve({ status: true, message: "Éxito.", data: null });
+    });
+}
+
+async function EnviarEmailActualizarCita(cita) {
+    return new Promise(async (resolve, reject) => {
+        if (cita.cit_estado === 'AGENDADA') {
+            let profesores = await profesorController.getAllByIds(cita.cit_profesores);
+            for (let index = 0; index < profesores.data.length; index++) {
+                const element = profesores.data[index];
+                let data = cita
+                data.email_imagen = bin.obtenerImagenEmail(2)
+                data.email_texto = 'este evento ha tenido algunos cambios, a continuación esta la informacion actualizada.'
+                data.cit_fecha_agendada_formateada = bin.formatearFechaDescriptiva(cita.cit_fecha_agendada)
+                let plantilla = 'NuevaCita'
+                let subject = 'Agendapp: ' + cita.cit_nombre
+                data.cit_destinatario = element.pro_nombre + ' ' + element.pro_apellido + ','
+                let destinatario = element.pro_correo.toLowerCase()
+                const mailController = require("../Controllers/MailController.js");
+                let result = await mailController.crearCitaEmail(data, plantilla, subject, destinatario)
+            }
+        }
         resolve({ status: true, message: "Éxito.", data: null });
     });
 }
 
 
+async function EnviarEmailEliminarCita(cita) {
+    return new Promise(async (resolve, reject) => {
+        if (cita.cit_estado === 'AGENDADA') {
+            let profesores = await profesorController.getAllByIds(cita.cit_profesores);
+            for (let index = 0; index < profesores.data.length; index++) {
+                const element = profesores.data[index];
+                let data = cita
+                data.email_imagen = bin.obtenerImagenEmail(4)
+                data.email_texto = 'este evento ha sido cancelado.'
+                data.cit_fecha_agendada_formateada = bin.formatearFechaDescriptiva(cita.cit_fecha_agendada)
+                let plantilla = 'NuevaCita'
+                let subject = 'Agendapp: ' + cita.cit_nombre
+                data.cit_destinatario = element.pro_nombre + ' ' + element.pro_apellido + ','
+                let destinatario = element.pro_correo.toLowerCase()
+                const mailController = require("../Controllers/MailController.js");
+                let result = await mailController.crearCitaEmail(data, plantilla, subject, destinatario)
+            }
+        }
+        resolve({ status: true, message: "Éxito.", data: null });
+    });
+}
 
 async function updateCitaMethod(req) {
     return new Promise(async (resolve, reject) => {

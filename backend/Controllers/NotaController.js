@@ -5,14 +5,12 @@ const logger = require('../bin/logger');
 const moment = require('moment-timezone');
 const zone = "America/Bogota"
 const format = "DD-MM-YYYY HH:mm:ss";
-const date = moment().tz(zone).format(format);
-
 
 //methods
 
 notaAgenda.save = async (request, response, next) => {
-
     const req = request.body;
+    const date = moment().tz(zone).format(format);
 
     let registro = await validarRegistro(req.not_nombre, request.user.id);
     if (registro.status) {

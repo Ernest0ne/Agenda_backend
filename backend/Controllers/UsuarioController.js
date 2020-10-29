@@ -9,13 +9,12 @@ const bin = require('../bin/funcionesGenerales');
 const moment = require('moment-timezone');
 const zone = "America/Bogota"
 const format = "DD-MM-YYYY HH:mm:ss";
-const date = moment().tz(zone).format(format);
-
 
 //methods
 
 usuarioAgenda.save = (req, res, next) => {
     var req = req.body;
+    const date = moment().tz(zone).format(format);
     const query = "insert into usuario (usu_id, usu_nombre, usu_apellido, usu_fecha_creacion, usu_clave, usu_correo, usu_tipo) values (now(),?,?,?,?,?,?) if not exists";
     try {
         bcrypt.hash(req.usu_clave, 10, function (err, hash) {
