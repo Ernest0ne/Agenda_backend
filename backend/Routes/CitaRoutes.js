@@ -13,6 +13,7 @@ router.post("/", md_authen.validateToken, citaController.save);
 router.put("/", md_authen.validateToken, citaController.update);
 router.delete("/", md_authen.validateToken, citaController.delete);
 router.post("/validateTime", md_authen.validateToken, citaController.validateTime);
+router.get("/filter", md_authen.validateToken, citaController.filter);
 
 
 module.exports = router;

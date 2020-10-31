@@ -107,9 +107,7 @@ citaAgenda.getByAgenda = async (request, response) => {
     //Se creo el siguiente index para poder buscar por id de agenda
     //CREATE INDEX ON cita (keys(cit_agenda));
     //la sentencia CONTAINS busca algun valor dentro del mapa que conincida con la id de la agenda
-
     await validarCitasPerdidas();
-
     const req = request.headers;
     const query = "select * from cita where cit_agenda CONTAINS? and cit_usuario =? allow filtering";
     try {
@@ -432,6 +430,51 @@ async function validarCitasPerdidas() {
     });
 }
 
+citaAgenda.filter = async (request, response) => {
+    response.status(200).send(await filterMethod(request));
+};
+
+async function filterMethod(request) {
+    return new Promise((resolve, reject) => {
+        const req = request.headers;
+        let query = "select * from cita where cit_agenda CONTAINS? and cit_usuario =? ";
+        if (req.cit_estado) query += 'and cit_estado =? '
+        query += 'allow filtering'
+
+        let parameters = [req.cit_agenda, request.user.id]
+        if (req.cit_estado) parameters.push(req.cit_estado)
+
+        try {
+            conection.execute(query, parameters, { prepare: true }, (err, result) => {
+                if (err) {
+                    logger.error(err.stack);
+                    console.log(err.stack);
+                    resolve({ status: false, message: "error in BD.", data: null });
+                } else {
+                    let citas = [];
+                    if (req.cit_fecha_agendada_inicio && req.cit_fecha_agendada_fin) {
+                        let fechaAgendadaInicio = moment(req.cit_fecha_agendada_inicio, "DD-MM-YYYY")
+                        let fechaAgendadaFin = moment(req.cit_fecha_agendada_fin, "DD-MM-YYYY")
+                        for (let index = 0; index < result.rows.length; index++) {
+                            const element = result.rows[index];
+                            let fechaAgendada = moment(element.cit_fecha_agendada, "DD-MM-YYYY")
+                            if (fechaAgendada.isSameOrBefore(fechaAgendadaFin) && fechaAgendada.isSameOrAfter(fechaAgendadaInicio)) {
+                                citas.push(element)
+                            }
+                        }
+                    } else {
+                        citas = result.rows
+                    }
+                    resolve({ status: true, message: "Éxito.", data: citas });
+                }
+            });
+        }
+        catch (error) {
+            logger.error(error.stack);
+            resolve({ status: false, message: "Not Acceptable.", data: null });
+        }
+    });
+}
 
 
 //exports
