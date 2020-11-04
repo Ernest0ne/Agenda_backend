@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 app.use(cors({
     limit: '500mb',
     extended: true,
-    origin: [`http://${process.env.HOST_FRONTEND}`, `http://${process.env.HOST_FRONTEND_MEDIANET}`, "http://localhost:4200"],
+    origin: [`http://${process.env.HOST_FRONTEND}`, `http://${process.env.HOST_FRONTEND_MEDIANET}`, "http://localhost:4200", "http://localhost", "http://18a6549c38fe.ngrok.io"],
     exposedHeaders: ['to-token-refresh', 'ids', 'usercodeid', 'authenticator', 'usercode', 'Pragma', 'Cache-Control', 'cache-control', 'pragma'],
 }));
 
