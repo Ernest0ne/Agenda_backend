@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/socket.io": "^2.1.2",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "cassandra-driver": "^4.1.0",
     "cjs-loader": "^0.1.0",
     "cors": "^2.8.5",
